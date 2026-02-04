@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
 const AVAILABLE_TAGS = ['bug', 'feature', 'improvement', 'urgent', 'documentation'];
 
-const TaskModal = ({ task, onSave, onClose }) => {
+const TaskModal = ({ task, epics, onSave, onClose }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     column: 'Backlog',
     tags: [],
+    epicId: null,
   });
 
   useEffect(() => {
@@ -18,6 +19,7 @@ const TaskModal = ({ task, onSave, onClose }) => {
         description: task.description || '',
         column: task.column || 'Backlog',
         tags: task.tags || [],
+        epicId: task.epicId || null,
       });
     }
   }, [task]);
@@ -80,6 +82,31 @@ const TaskModal = ({ task, onSave, onClose }) => {
                 <option key={column} value={column}>{column}</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Epic</label>
+            <select
+              value={formData.epicId || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, epicId: e.target.value || null }))}
+              className="w-full bg-dark-hover border border-dark-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">No Epic</option>
+              {epics?.map(epic => (
+                <option key={epic.id} value={epic.id}>
+                  {epic.name}
+                </option>
+              ))}
+            </select>
+            {formData.epicId && epics?.find(e => e.id === formData.epicId) && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-400">
+                <div 
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: epics.find(e => e.id === formData.epicId).color }}
+                />
+                <span>{epics.find(e => e.id === formData.epicId).name}</span>
+              </div>
+            )}
           </div>
 
           <div>

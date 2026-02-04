@@ -6,9 +6,35 @@ import Column from './components/Column';
 import TaskCard from './components/TaskCard';
 import ActivityFeed from './components/ActivityFeed';
 import TaskModal from './components/TaskModal';
+import EpicSidebar from './components/EpicSidebar';
+import EpicModal from './components/EpicModal';
 import './App.css';
 
 const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
+
+const SAMPLE_EPICS = [
+  {
+    id: 'epic-1',
+    name: 'Q1 Platform Improvements',
+    description: 'Major platform enhancements for Q1 2026',
+    color: '#3b82f6',
+    createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+  },
+  {
+    id: 'epic-2',
+    name: 'Mobile App Launch',
+    description: 'iOS and Android app development',
+    color: '#8b5cf6',
+    createdAt: new Date(Date.now() - 86400000 * 8).toISOString(),
+  },
+  {
+    id: 'epic-3',
+    name: 'Security Hardening',
+    description: 'Security improvements and compliance',
+    color: '#ef4444',
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+];
 
 const SAMPLE_TASKS = [
   {
@@ -17,6 +43,7 @@ const SAMPLE_TASKS = [
     description: 'Team sync at 10 AM',
     column: 'Recurring',
     tags: ['feature'],
+    epicId: null,
     createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
@@ -26,6 +53,7 @@ const SAMPLE_TASKS = [
     description: 'Check team PRs and provide feedback',
     column: 'Recurring',
     tags: ['improvement'],
+    epicId: null,
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
   },
@@ -35,6 +63,7 @@ const SAMPLE_TASKS = [
     description: 'Users reporting login issues on mobile',
     column: 'In Progress',
     tags: ['bug', 'urgent'],
+    epicId: 'epic-3',
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 1800000).toISOString(),
   },
@@ -44,6 +73,7 @@ const SAMPLE_TASKS = [
     description: 'Create mockups for the analytics dashboard',
     column: 'Backlog',
     tags: ['feature'],
+    epicId: 'epic-1',
     createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
@@ -53,6 +83,7 @@ const SAMPLE_TASKS = [
     description: 'Add examples for new endpoints',
     column: 'Review',
     tags: ['documentation'],
+    epicId: 'epic-1',
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
@@ -62,6 +93,7 @@ const SAMPLE_TASKS = [
     description: 'Improve performance on user dashboard',
     column: 'Backlog',
     tags: ['improvement'],
+    epicId: 'epic-1',
     createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
     updatedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
   },
@@ -71,6 +103,7 @@ const SAMPLE_TASKS = [
     description: 'Add user preference for theme switching',
     column: 'In Progress',
     tags: ['feature'],
+    epicId: 'epic-2',
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     updatedAt: new Date(Date.now() - 900000).toISOString(),
   },
@@ -78,10 +111,14 @@ const SAMPLE_TASKS = [
 
 function App() {
   const [tasks, setTasks] = useState([]);
+  const [epics, setEpics] = useState([]);
   const [activities, setActivities] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [selectedEpicId, setSelectedEpicId] = useState(null);
+  const [isEpicModalOpen, setIsEpicModalOpen] = useState(false);
+  const [editingEpic, setEditingEpic] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -94,6 +131,7 @@ function App() {
   // Load data from localStorage
   useEffect(() => {
     const savedTasks = localStorage.getItem('kanban-tasks');
+    const savedEpics = localStorage.getItem('kanban-epics');
     const savedActivities = localStorage.getItem('kanban-activities');
     
     if (savedTasks) {
@@ -109,6 +147,13 @@ function App() {
       };
       setActivities([welcomeActivity]);
     }
+
+    if (savedEpics) {
+      setEpics(JSON.parse(savedEpics));
+    } else {
+      // Initialize with sample epics on first load
+      setEpics(SAMPLE_EPICS);
+    }
     
     if (savedActivities) {
       setActivities(JSON.parse(savedActivities));
@@ -120,10 +165,13 @@ function App() {
     if (tasks.length > 0) {
       localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
     }
+    if (epics.length > 0) {
+      localStorage.setItem('kanban-epics', JSON.stringify(epics));
+    }
     if (activities.length > 0) {
       localStorage.setItem('kanban-activities', JSON.stringify(activities));
     }
-  }, [tasks, activities]);
+  }, [tasks, epics, activities]);
 
   const addActivity = (type, taskTitle, fromColumn = null, toColumn = null) => {
     const activity = {
@@ -207,69 +255,163 @@ function App() {
     }
   };
 
+  // Epic handlers
+  const handleCreateEpic = (epicData) => {
+    const newEpic = {
+      id: `epic-${Date.now()}`,
+      ...epicData,
+      createdAt: new Date().toISOString(),
+    };
+    setEpics(prevEpics => [...prevEpics, newEpic]);
+    addActivity('created', `Epic: ${epicData.name}`);
+    setIsEpicModalOpen(false);
+  };
+
+  const handleEditEpic = (epic) => {
+    setEditingEpic(epic);
+    setIsEpicModalOpen(true);
+  };
+
+  const handleSaveEpic = (epicData) => {
+    if (editingEpic) {
+      setEpics(prevEpics =>
+        prevEpics.map(epic =>
+          epic.id === editingEpic.id ? { ...epic, ...epicData } : epic
+        )
+      );
+      addActivity('edited', `Epic: ${epicData.name}`);
+    } else {
+      handleCreateEpic(epicData);
+    }
+    setIsEpicModalOpen(false);
+    setEditingEpic(null);
+  };
+
+  const handleDeleteEpic = (epicId) => {
+    const epic = epics.find(e => e.id === epicId);
+    // Remove epicId from all tasks linked to this epic
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.epicId === epicId ? { ...task, epicId: null } : task
+      )
+    );
+    setEpics(prevEpics => prevEpics.filter(e => e.id !== epicId));
+    if (epic) {
+      addActivity('deleted', `Epic: ${epic.name}`);
+    }
+    if (selectedEpicId === epicId) {
+      setSelectedEpicId(null);
+    }
+  };
+
   const getTasksByColumn = (column) => {
-    return tasks.filter(task => task.column === column);
+    let filteredTasks = tasks.filter(task => task.column === column);
+    
+    // Apply epic filter if selected
+    if (selectedEpicId !== null) {
+      filteredTasks = filteredTasks.filter(task => task.epicId === selectedEpicId);
+    }
+    
+    return filteredTasks;
+  };
+
+  // Get filtered tasks for stats
+  const getFilteredTasks = () => {
+    if (selectedEpicId === null) {
+      return tasks;
+    }
+    return tasks.filter(task => task.epicId === selectedEpicId);
   };
 
   const activeTask = tasks.find(t => t.id === activeId);
 
   return (
-    <div className="min-h-screen bg-dark-bg text-white">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Mission Control
-            </h1>
-            <p className="text-gray-400 text-sm mt-1">Your tasks, organized and tracked</p>
-          </div>
-          <button
-            onClick={() => {
-              setEditingTask(null);
-              setIsModalOpen(true);
-            }}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20"
-          >
-            + New Task
-          </button>
-        </div>
+    <div className="min-h-screen bg-dark-bg text-white flex">
+      {/* Epic Sidebar */}
+      <EpicSidebar
+        epics={epics}
+        selectedEpicId={selectedEpicId}
+        onSelectEpic={setSelectedEpicId}
+        onCreateEpic={handleCreateEpic}
+        onEditEpic={handleEditEpic}
+        onDeleteEpic={handleDeleteEpic}
+        tasks={tasks}
+      />
 
-        {/* Stats Bar */}
-        <StatsBar tasks={tasks} />
-
-        <div className="flex gap-6 mt-6">
-          {/* Main Board */}
-          <div className="flex-1">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCorners}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        <div className="container mx-auto px-4 py-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                Mission Control
+              </h1>
+              <p className="text-gray-400 text-sm mt-1">
+                {selectedEpicId ? (
+                  <>
+                    Filtered by Epic:{' '}
+                    <span className="text-white font-medium">
+                      {epics.find(e => e.id === selectedEpicId)?.name}
+                    </span>
+                  </>
+                ) : (
+                  'Your tasks, organized and tracked'
+                )}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setEditingTask(null);
+                setIsModalOpen(true);
+              }}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20"
             >
-              <div className="grid grid-cols-4 gap-4">
-                {COLUMNS.map(column => (
-                  <Column
-                    key={column}
-                    id={column}
-                    title={column}
-                    tasks={getTasksByColumn(column)}
-                    onEditTask={handleEditTask}
-                    onDeleteTask={handleDeleteTask}
-                    onCompleteTask={handleCompleteTask}
-                  />
-                ))}
-              </div>
-              <DragOverlay>
-                {activeTask ? (
-                  <TaskCard task={activeTask} isDragging />
-                ) : null}
-              </DragOverlay>
-            </DndContext>
+              + New Task
+            </button>
           </div>
 
-          {/* Activity Feed */}
-          <ActivityFeed activities={activities} />
+          {/* Stats Bar */}
+          <StatsBar tasks={getFilteredTasks()} />
+
+          <div className="flex gap-6 mt-6">
+            {/* Main Board */}
+            <div className="flex-1">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="grid grid-cols-4 gap-4">
+                  {COLUMNS.map(column => (
+                    <Column
+                      key={column}
+                      id={column}
+                      title={column}
+                      tasks={getTasksByColumn(column)}
+                      onEditTask={handleEditTask}
+                      onDeleteTask={handleDeleteTask}
+                      onCompleteTask={handleCompleteTask}
+                      epics={epics}
+                    />
+                  ))}
+                </div>
+                <DragOverlay>
+                  {activeTask ? (
+                    <TaskCard 
+                      task={activeTask} 
+                      isDragging 
+                      epic={epics.find(e => e.id === activeTask.epicId)}
+                    />
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
+            </div>
+
+            {/* Activity Feed */}
+            <ActivityFeed activities={activities} />
+          </div>
         </div>
       </div>
 
@@ -277,10 +419,23 @@ function App() {
       {isModalOpen && (
         <TaskModal
           task={editingTask}
+          epics={epics}
           onSave={handleAddTask}
           onClose={() => {
             setIsModalOpen(false);
             setEditingTask(null);
+          }}
+        />
+      )}
+
+      {/* Epic Modal */}
+      {isEpicModalOpen && (
+        <EpicModal
+          epic={editingEpic}
+          onSave={handleSaveEpic}
+          onClose={() => {
+            setIsEpicModalOpen(false);
+            setEditingEpic(null);
           }}
         />
       )}

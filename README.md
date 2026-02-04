@@ -1,20 +1,41 @@
 # Mission Control - Kanban Task Board
 
-A modern, dark-themed Kanban task board built with React, featuring drag-and-drop functionality, activity tracking, and a sleek UI inspired by mission control interfaces.
+A modern, dark-themed Kanban task board built with React, featuring drag-and-drop functionality, Epic-based filtering, activity tracking, and a sleek UI inspired by mission control interfaces.
 
 ![Mission Control Kanban Board](https://img.shields.io/badge/React-v18-blue) ![Vite](https://img.shields.io/badge/Vite-v6-646CFF) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v3-38BDF8)
 
 ## ✨ Features
 
+- **🎯 Epic Management** - Organize tasks into Epics (large initiatives) with color-coded indicators
+- **🔍 Epic Filtering** - Filter the entire board by Epic to focus on specific work streams
 - **🎨 Dark Theme UI** - Sleek, modern interface with subtle borders and dark backgrounds
 - **📊 4 Kanban Columns** - Recurring, Backlog, In Progress, Review
 - **🔄 Drag & Drop** - Intuitive task management with @dnd-kit
 - **🏷️ Color-Coded Tags** - Organize tasks with bug, feature, improvement, urgent, and documentation labels
-- **📈 Stats Dashboard** - Track tasks this week, in progress, total count, and completion rate
+- **📈 Stats Dashboard** - Track tasks this week, in progress, total count, and completion rate (updates based on Epic filter)
 - **📋 Activity Feed** - Real-time sidebar showing recent actions (created, moved, completed, deleted)
 - **💾 Local Storage** - All data persists in browser, no backend needed
-- **✏️ Full CRUD** - Add, edit, delete, and complete tasks with ease
+- **✏️ Full CRUD** - Add, edit, delete, and complete tasks and epics with ease
 - **⏱️ Smart Timestamps** - Relative time display (e.g., "2h ago")
+- **📱 Collapsible Sidebar** - Epic sidebar can be collapsed to maximize board space
+
+## 🎯 Epic Feature
+
+### What are Epics?
+
+Epics are large initiatives or themes that group related tasks together. For example:
+- **Q1 Platform Improvements** - All platform enhancement tasks
+- **Mobile App Launch** - iOS and Android development tasks
+- **Security Hardening** - Security-related work items
+
+### Epic Functionality
+
+- **Create Epics** - Define new epics with name, description, and color
+- **Link Tasks to Epics** - Assign tasks to epics when creating or editing
+- **Filter by Epic** - Click an epic in the sidebar to show only its tasks
+- **Visual Indicators** - Tasks display epic color badges on cards
+- **Task Counts** - Each epic shows how many tasks are linked to it
+- **Edit & Delete** - Manage epics with inline edit/delete actions (deleting an epic unlinks tasks, doesn't delete them)
 
 ## 🚀 Quick Start
 
@@ -58,9 +79,11 @@ mission-control-kanban/
 │   ├── components/
 │   │   ├── ActivityFeed.jsx    # Activity sidebar
 │   │   ├── Column.jsx           # Kanban column container
+│   │   ├── EpicSidebar.jsx      # Epic list and filtering sidebar
+│   │   ├── EpicModal.jsx        # Epic creation/editing modal
 │   │   ├── StatsBar.jsx         # Top statistics bar
-│   │   ├── TaskCard.jsx         # Individual task card
-│   │   └── TaskModal.jsx        # Add/edit task modal
+│   │   ├── TaskCard.jsx         # Individual task card with epic badge
+│   │   └── TaskModal.jsx        # Add/edit task modal with epic selector
 │   ├── App.jsx                  # Main app component
 │   ├── index.css                # Global styles
 │   └── main.jsx                 # Entry point
@@ -70,19 +93,46 @@ mission-control-kanban/
 
 ## 🎯 Usage
 
+### Managing Epics
+
+#### Creating an Epic
+1. Click "+ New Epic" in the left sidebar
+2. Enter epic name, description (optional), and choose a color
+3. Click "Create" to save
+
+#### Editing an Epic
+1. Hover over an epic in the sidebar
+2. Click the ✏️ icon
+3. Make changes and click "Save Changes"
+
+#### Deleting an Epic
+1. Hover over an epic in the sidebar
+2. Click the 🗑️ icon
+3. Confirm deletion (tasks will be unlinked but not deleted)
+
+#### Filtering by Epic
+1. Click any epic in the sidebar to filter the board
+2. Only tasks linked to that epic will display
+3. Stats update to reflect the filtered view
+4. Click "All Tasks" to remove the filter
+
 ### Creating Tasks
 1. Click "+ New Task" button
-2. Fill in title, description, select column, and add tags
-3. Click "Create Task"
+2. Fill in title, description, select column
+3. **Select an Epic** from the dropdown (optional)
+4. Add tags
+5. Click "Create Task"
 
 ### Managing Tasks
 - **Drag & Drop**: Click and drag tasks between columns
 - **Edit**: Hover over a task and click the ✏️ icon
+  - Change epic assignment in the edit modal
 - **Complete**: Click the ✓ icon to mark as done (moves to activity feed)
 - **Delete**: Click the 🗑️ icon to remove
+- **Epic Badge**: Task cards show a colored epic indicator when linked
 
 ### Activity Feed
-The right sidebar shows all recent actions with timestamps, keeping you updated on task movements and changes.
+The right sidebar shows all recent actions with timestamps, keeping you updated on task movements and changes. Activity feed is **not filtered** by epic - it shows all activity.
 
 ## 🌐 Deployment
 
@@ -141,7 +191,25 @@ npm run deploy
 
 ## 🎨 Customization
 
-### Colors
+### Epic Colors
+Epic colors are preset in `src/components/EpicModal.jsx` and `src/components/EpicSidebar.jsx`:
+
+```js
+const PRESET_COLORS = [
+  '#3b82f6', // blue
+  '#8b5cf6', // purple
+  '#ec4899', // pink
+  '#f59e0b', // amber
+  '#10b981', // green
+  '#06b6d4', // cyan
+  '#f97316', // orange
+  '#ef4444', // red
+  '#14b8a6', // teal
+  '#6366f1', // indigo
+];
+```
+
+### Theme Colors
 Edit `tailwind.config.js` to customize the color scheme:
 
 ```js
@@ -167,6 +235,33 @@ Modify columns in `src/App.jsx`:
 
 ```js
 const COLUMNS = ['Recurring', 'Backlog', 'In Progress', 'Review'];
+```
+
+## 💾 Data Structure
+
+### Epic Object
+```js
+{
+  id: 'epic-1',
+  name: 'Q1 Platform Improvements',
+  description: 'Major platform enhancements for Q1 2026',
+  color: '#3b82f6',
+  createdAt: '2026-01-25T10:00:00.000Z'
+}
+```
+
+### Task Object
+```js
+{
+  id: 1,
+  title: 'Fix authentication bug',
+  description: 'Users reporting login issues on mobile',
+  column: 'In Progress',
+  tags: ['bug', 'urgent'],
+  epicId: 'epic-1',  // Links to epic
+  createdAt: '2026-02-01T10:00:00.000Z',
+  updatedAt: '2026-02-03T15:30:00.000Z'
+}
 ```
 
 ## 📝 License

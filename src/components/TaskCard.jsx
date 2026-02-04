@@ -10,7 +10,7 @@ const TAG_COLORS = {
   documentation: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
 };
 
-const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging }) => {
+const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic }) => {
   const {
     attributes,
     listeners,
@@ -47,8 +47,19 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging }) => {
       className="bg-dark-hover/80 backdrop-blur-sm border border-dark-border/40 rounded-xl p-5 cursor-grab active:cursor-grabbing hover:border-gray-500/50 transition-all duration-200 group shadow-xl hover:shadow-2xl hover:shadow-black/50 shadow-black/40 hover:-translate-y-0.5"
     >
       <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-white flex-1 leading-snug">{task.title}</h3>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ml-2">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-white leading-snug">{task.title}</h3>
+          {epic && (
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <div 
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ backgroundColor: epic.color }}
+              />
+              <span className="text-xs text-gray-400 truncate">{epic.name}</span>
+            </div>
+          )}
+        </div>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ml-2 flex-shrink-0">
           <button
             onClick={(e) => {
               e.stopPropagation();
