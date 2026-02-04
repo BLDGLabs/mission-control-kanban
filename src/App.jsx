@@ -285,17 +285,25 @@ function App() {
 
     if (activeTask && COLUMNS.includes(overColumn) && activeTask.column !== overColumn) {
       try {
+        const now = new Date().toISOString();
+        const updates = { 
+          column: overColumn, 
+          updatedAt: now,
+          // Set completedAt when moving to Done, clear it when moving out
+          ...(overColumn === 'Done' ? { completedAt: now } : { completedAt: null })
+        };
+        
         // Optimistic update
         setTasks(prevTasks => 
           prevTasks.map(task => 
             task.id === active.id 
-              ? { ...task, column: overColumn, updatedAt: new Date().toISOString() }
+              ? { ...task, ...updates }
               : task
           )
         );
         
         // Update in DynamoDB
-        await db.updateTask(active.id, { column: overColumn });
+        await db.updateTask(active.id, updates);
         addActivity('moved', activeTask.title, activeTask.column, overColumn);
       } catch (err) {
         console.error('Error updating task:', err);
@@ -466,7 +474,7 @@ function App() {
     if (column === 'Done' && !showAllDone) {
       const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
       filteredTasks = filteredTasks.filter(task => {
-        const completedAt = new Date(task.updatedAt || task.createdAt).getTime();
+        const completedAt = new Date(task.completedAt || task.updatedAt || task.createdAt).getTime();
         return completedAt > oneDayAgo;
       });
     }
