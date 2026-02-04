@@ -86,7 +86,21 @@ The right sidebar shows all recent actions with timestamps, keeping you updated 
 
 ## 🌐 Deployment
 
-### Deploy to Vercel (Recommended)
+### Deploy to AWS Amplify (Recommended)
+
+1. Push your code to GitHub
+2. Visit [AWS Amplify Console](https://console.aws.amazon.com/amplify/)
+3. Click "New app" → "Host web app"
+4. Connect your GitHub repository
+5. Configure build settings:
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+   - **Node version**: 18+ (or use `.nvmrc` if needed)
+6. Click "Save and Deploy"
+
+AWS Amplify will automatically deploy on every push to your main branch.
+
+### Deploy to Vercel
 
 1. Push your code to GitHub
 2. Visit [vercel.com](https://vercel.com)
