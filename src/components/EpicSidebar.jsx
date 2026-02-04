@@ -20,7 +20,7 @@ const EpicSidebar = ({ epics, selectedEpicId, onSelectEpic, onCreateEpic, onEdit
   };
 
   const getAssigneeTaskCount = (assignee) => {
-    let filteredTasks = tasks.filter(task => task.assignedTo === assignee);
+    let filteredTasks = tasks.filter(task => task.assignedTo === assignee || (assignee === null && task.assignedTo === 'Unassigned'));
     if (selectedEpicId !== null) {
       filteredTasks = filteredTasks.filter(task => task.epicId === selectedEpicId);
     }
@@ -28,7 +28,7 @@ const EpicSidebar = ({ epics, selectedEpicId, onSelectEpic, onCreateEpic, onEdit
   };
 
   const getUnassignedTaskCount = () => {
-    let filteredTasks = tasks.filter(task => !task.assignedTo);
+    let filteredTasks = tasks.filter(task => !task.assignedTo || task.assignedTo === 'Unassigned');
     if (selectedEpicId !== null) {
       filteredTasks = filteredTasks.filter(task => task.epicId === selectedEpicId);
     }

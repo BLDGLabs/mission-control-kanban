@@ -464,7 +464,7 @@ function App() {
     // Apply assignee filter if selected
     if (selectedAssignee !== null) {
       if (selectedAssignee === 'unassigned') {
-        filteredTasks = filteredTasks.filter(task => !task.assignedTo);
+        filteredTasks = filteredTasks.filter(task => !task.assignedTo || task.assignedTo === 'Unassigned');
       } else {
         filteredTasks = filteredTasks.filter(task => task.assignedTo === selectedAssignee);
       }
@@ -495,7 +495,7 @@ function App() {
     
     if (selectedAssignee !== null) {
       if (selectedAssignee === 'unassigned') {
-        filteredTasks = filteredTasks.filter(task => !task.assignedTo);
+        filteredTasks = filteredTasks.filter(task => !task.assignedTo || task.assignedTo === 'Unassigned');
       } else {
         filteredTasks = filteredTasks.filter(task => task.assignedTo === selectedAssignee);
       }
