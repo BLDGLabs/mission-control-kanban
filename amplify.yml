@@ -6,10 +6,18 @@ frontend:
         - npm ci
     build:
       commands:
+        - echo "=== Debug env vars ==="
+        - echo "VITE_AWS_REGION=$VITE_AWS_REGION"
+        - echo "VITE_DYNAMODB_TABLE_NAME=$VITE_DYNAMODB_TABLE_NAME"
+        - echo "Access key first 8 chars=${VITE_AWS_ACCESS_KEY_ID:0:8}..."
+        - echo "=== Writing to .env.production ==="
         - echo "VITE_AWS_ACCESS_KEY_ID=$VITE_AWS_ACCESS_KEY_ID" >> .env.production
         - echo "VITE_AWS_SECRET_ACCESS_KEY=$VITE_AWS_SECRET_ACCESS_KEY" >> .env.production
         - echo "VITE_AWS_REGION=$VITE_AWS_REGION" >> .env.production
         - echo "VITE_DYNAMODB_TABLE_NAME=$VITE_DYNAMODB_TABLE_NAME" >> .env.production
+        - echo "=== Contents of .env.production ==="
+        - cat .env.production
+        - echo "=== Running build ==="
         - npm run build
   artifacts:
     baseDirectory: dist
