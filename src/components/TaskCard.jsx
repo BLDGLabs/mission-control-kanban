@@ -15,6 +15,12 @@ const ASSIGNEE_COLORS = {
   'Jason': 'bg-blue-500/20 text-blue-400 border-blue-500/40',
 };
 
+// Avatar images - stored in public/avatars/
+const ASSIGNEE_AVATARS = {
+  'Miti': '/avatars/miti.png',
+  'Jason': '/avatars/jason.png',
+};
+
 const ASSIGNEE_INITIALS = {
   'Miti': 'M',
   'Jason': 'J',
@@ -79,10 +85,25 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBloc
             <h3 className="font-semibold text-white leading-snug">{task.title}</h3>
             {task.assignedTo && (
               <div 
-                className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold border ${ASSIGNEE_COLORS[task.assignedTo]}`}
+                className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold border overflow-hidden ${ASSIGNEE_COLORS[task.assignedTo]}`}
                 title={`Assigned to ${task.assignedTo}`}
               >
-                {ASSIGNEE_INITIALS[task.assignedTo]}
+                {ASSIGNEE_AVATARS[task.assignedTo] ? (
+                  <img 
+                    src={ASSIGNEE_AVATARS[task.assignedTo]} 
+                    alt={task.assignedTo}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <span 
+                  className={`${ASSIGNEE_AVATARS[task.assignedTo] ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}
+                >
+                  {ASSIGNEE_INITIALS[task.assignedTo]}
+                </span>
               </div>
             )}
           </div>
