@@ -8,6 +8,7 @@ import ActivityFeed from './components/ActivityFeed';
 import TaskModal from './components/TaskModal';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
+import MitiStatusWidget from './components/MitiStatusWidget';
 import * as db from './services/dynamodb';
 import './App.css';
 
@@ -604,16 +605,22 @@ function App() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => {
-                setEditingTask(null);
-                setIsModalOpen(true);
-              }}
-              className="px-3 py-2 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20 text-sm md:text-base"
-            >
-              <span className="hidden sm:inline">+ New Task</span>
-              <span className="sm:hidden">+ New</span>
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Miti Status Widget */}
+              <div className="hidden sm:block">
+                <MitiStatusWidget />
+              </div>
+              <button
+                onClick={() => {
+                  setEditingTask(null);
+                  setIsModalOpen(true);
+                }}
+                className="px-3 py-2 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20 text-sm md:text-base"
+              >
+                <span className="hidden sm:inline">+ New Task</span>
+                <span className="sm:hidden">+ New</span>
+              </button>
+            </div>
           </div>
 
           {/* Stats Bar */}
