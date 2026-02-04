@@ -463,6 +463,9 @@ function App() {
       }
     }
     
+    // Sort by createdAt descending (newest first)
+    filteredTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
     return filteredTasks;
   };
 
