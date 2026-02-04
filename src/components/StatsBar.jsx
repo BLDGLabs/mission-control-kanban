@@ -15,21 +15,24 @@ const StatsBar = ({ tasks }) => {
   const completionRate = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0;
 
   const stats = [
-    { label: 'Tasks This Week', value: tasksThisWeek, color: 'text-blue-400' },
-    { label: 'In Progress', value: inProgress, color: 'text-yellow-400' },
-    { label: 'Total Tasks', value: totalTasks, color: 'text-purple-400' },
-    { label: 'Completion Rate', value: `${completionRate}%`, color: 'text-green-400' },
+    { label: 'This Week', fullLabel: 'Tasks This Week', value: tasksThisWeek, color: 'text-blue-400' },
+    { label: 'In Progress', fullLabel: 'In Progress', value: inProgress, color: 'text-yellow-400' },
+    { label: 'Total', fullLabel: 'Total Tasks', value: totalTasks, color: 'text-purple-400' },
+    { label: 'Done', fullLabel: 'Completion Rate', value: `${completionRate}%`, color: 'text-green-400' },
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-4 gap-2 md:gap-4">
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="bg-dark-card border border-dark-border rounded-lg p-4 hover:border-gray-600 transition-colors"
+          className="bg-dark-card border border-dark-border rounded-lg p-2 md:p-4 hover:border-gray-600 transition-colors"
         >
-          <div className="text-gray-400 text-sm mb-1">{stat.label}</div>
-          <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
+          <div className="text-gray-400 text-xs md:text-sm mb-0.5 md:mb-1 truncate">
+            <span className="md:hidden">{stat.label}</span>
+            <span className="hidden md:inline">{stat.fullLabel}</span>
+          </div>
+          <div className={`text-lg md:text-3xl font-bold ${stat.color}`}>{stat.value}</div>
         </div>
       ))}
     </div>

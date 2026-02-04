@@ -137,6 +137,8 @@ function App() {
   const [editingEpic, setEditingEpic] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mobileColumnIndex, setMobileColumnIndex] = useState(1); // Start on Backlog
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -531,74 +533,120 @@ function App() {
 
   return (
     <div className="min-h-screen bg-dark-bg text-white flex">
-      {/* Epic Sidebar */}
-      <EpicSidebar
-        epics={epics}
-        selectedEpicId={selectedEpicId}
-        onSelectEpic={setSelectedEpicId}
-        selectedAssignee={selectedAssignee}
-        onSelectAssignee={setSelectedAssignee}
-        onCreateEpic={handleCreateEpic}
-        onEditEpic={handleEditEpic}
-        onDeleteEpic={handleDeleteEpic}
-        tasks={tasks}
-      />
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
+      {/* Epic Sidebar - Hidden on mobile unless open */}
+      <div className={`${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-50 md:z-auto transition-transform duration-300`}>
+        <EpicSidebar
+          epics={epics}
+          selectedEpicId={selectedEpicId}
+          onSelectEpic={(id) => {
+            setSelectedEpicId(id);
+            setIsMobileSidebarOpen(false);
+          }}
+          selectedAssignee={selectedAssignee}
+          onSelectAssignee={(assignee) => {
+            setSelectedAssignee(assignee);
+            setIsMobileSidebarOpen(false);
+          }}
+          onCreateEpic={handleCreateEpic}
+          onEditEpic={handleEditEpic}
+          onDeleteEpic={handleDeleteEpic}
+          tasks={tasks}
+        />
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <div className="container mx-auto px-4 py-6">
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="container mx-auto px-3 md:px-4 py-4 md:py-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                Mission Control
-              </h1>
-              <p className="text-gray-400 text-sm mt-1">
-                {selectedEpicId || selectedAssignee ? (
-                  <>
-                    {selectedEpicId && (
-                      <>
-                        Epic: <span className="text-white font-medium">{epics.find(e => e.id === selectedEpicId)?.name}</span>
-                      </>
-                    )}
-                    {selectedEpicId && selectedAssignee && <span className="mx-1">•</span>}
-                    {selectedAssignee && (
-                      <>
-                        Assignee: <span className="text-white font-medium">
-                          {selectedAssignee === 'unassigned' ? 'Unassigned' : selectedAssignee}
-                        </span>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  'Your tasks, organized and tracked'
-                )}
-              </p>
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="flex items-center gap-3">
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="md:hidden p-2 hover:bg-dark-hover rounded-lg"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                  Mission Control
+                </h1>
+                <p className="text-gray-400 text-xs md:text-sm mt-0.5 md:mt-1 hidden sm:block">
+                  {selectedEpicId || selectedAssignee ? (
+                    <>
+                      {selectedEpicId && (
+                        <>
+                          Epic: <span className="text-white font-medium">{epics.find(e => e.id === selectedEpicId)?.name}</span>
+                        </>
+                      )}
+                      {selectedEpicId && selectedAssignee && <span className="mx-1">•</span>}
+                      {selectedAssignee && (
+                        <>
+                          Assignee: <span className="text-white font-medium">
+                            {selectedAssignee === 'unassigned' ? 'Unassigned' : selectedAssignee}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    'Your tasks, organized and tracked'
+                  )}
+                </p>
+              </div>
             </div>
             <button
               onClick={() => {
                 setEditingTask(null);
                 setIsModalOpen(true);
               }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20"
+              className="px-3 py-2 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors shadow-lg shadow-blue-600/20 text-sm md:text-base"
             >
-              + New Task
+              <span className="hidden sm:inline">+ New Task</span>
+              <span className="sm:hidden">+ New</span>
             </button>
           </div>
 
           {/* Stats Bar */}
           <StatsBar tasks={getFilteredTasks()} />
 
-          <div className="flex gap-6 mt-6">
+          {/* Mobile Column Selector */}
+          <div className="flex md:hidden gap-1 mt-4 mb-3 overflow-x-auto pb-2 -mx-3 px-3">
+            {COLUMNS.map((column, index) => (
+              <button
+                key={column}
+                onClick={() => setMobileColumnIndex(index)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  mobileColumnIndex === index
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-dark-card text-gray-400 hover:bg-dark-hover'
+                }`}
+              >
+                {column} ({getTasksByColumn(column).length})
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-4 md:gap-6 mt-4 md:mt-6">
             {/* Main Board */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
               >
-                <div className="grid grid-cols-4 gap-4">
+                {/* Desktop: 4 columns */}
+                <div className="hidden md:grid md:grid-cols-4 gap-4">
                   {COLUMNS.map(column => (
                     <Column
                       key={column}
@@ -615,6 +663,57 @@ function App() {
                     />
                   ))}
                 </div>
+                
+                {/* Mobile: Single column with swipe */}
+                <div className="md:hidden">
+                  <Column
+                    key={COLUMNS[mobileColumnIndex]}
+                    id={COLUMNS[mobileColumnIndex]}
+                    title={COLUMNS[mobileColumnIndex]}
+                    tasks={getTasksByColumn(COLUMNS[mobileColumnIndex])}
+                    onEditTask={handleEditTask}
+                    onDeleteTask={handleDeleteTask}
+                    onCompleteTask={handleCompleteTask}
+                    epics={epics}
+                    allTasks={tasks}
+                    isTaskBlocked={isTaskBlocked}
+                    getBlockingTasks={getBlockingTasks}
+                  />
+                  
+                  {/* Mobile swipe hint / navigation */}
+                  <div className="flex justify-between items-center mt-4 px-2">
+                    <button
+                      onClick={() => setMobileColumnIndex(prev => Math.max(0, prev - 1))}
+                      disabled={mobileColumnIndex === 0}
+                      className={`p-2 rounded-lg transition-colors ${
+                        mobileColumnIndex === 0 
+                          ? 'text-gray-600' 
+                          : 'text-gray-400 hover:bg-dark-hover hover:text-white'
+                      }`}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span className="text-gray-500 text-sm">
+                      {mobileColumnIndex + 1} / {COLUMNS.length}
+                    </span>
+                    <button
+                      onClick={() => setMobileColumnIndex(prev => Math.min(COLUMNS.length - 1, prev + 1))}
+                      disabled={mobileColumnIndex === COLUMNS.length - 1}
+                      className={`p-2 rounded-lg transition-colors ${
+                        mobileColumnIndex === COLUMNS.length - 1 
+                          ? 'text-gray-600' 
+                          : 'text-gray-400 hover:bg-dark-hover hover:text-white'
+                      }`}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
                 <DragOverlay>
                   {activeTask ? (
                     <TaskCard 
@@ -629,8 +728,10 @@ function App() {
               </DndContext>
             </div>
 
-            {/* Activity Feed */}
-            <ActivityFeed activities={activities} />
+            {/* Activity Feed - Hidden on mobile */}
+            <div className="hidden lg:block">
+              <ActivityFeed activities={activities} />
+            </div>
           </div>
         </div>
       </div>
