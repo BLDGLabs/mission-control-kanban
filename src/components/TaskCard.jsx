@@ -12,18 +12,24 @@ const TAG_COLORS = {
 
 const ASSIGNEE_COLORS = {
   'Miti': 'bg-purple-500/20 text-purple-400 border-purple-500/40',
+  'miti': 'bg-purple-500/20 text-purple-400 border-purple-500/40',
   'Jason': 'bg-blue-500/20 text-blue-400 border-blue-500/40',
+  'jason': 'bg-blue-500/20 text-blue-400 border-blue-500/40',
 };
 
 // Avatar images - stored in public/avatars/
 const ASSIGNEE_AVATARS = {
   'Miti': '/avatars/miti.png',
+  'miti': '/avatars/miti.png',
   'Jason': '/avatars/jason.png',
+  'jason': '/avatars/jason.png',
 };
 
 const ASSIGNEE_INITIALS = {
   'Miti': 'M',
+  'miti': 'M',
   'Jason': 'J',
+  'jason': 'J',
 };
 
 const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBlocked, blockingTasks }) => {
@@ -85,7 +91,7 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBloc
             <h3 className="font-semibold text-white leading-snug">{task.title}</h3>
             {task.assignedTo && (
               <div 
-                className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold border overflow-hidden ${ASSIGNEE_COLORS[task.assignedTo]}`}
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold border-2 overflow-hidden flex-shrink-0 ${ASSIGNEE_COLORS[task.assignedTo] || 'bg-gray-500/20 text-gray-400 border-gray-500/40'}`}
                 title={`Assigned to ${task.assignedTo}`}
               >
                 {ASSIGNEE_AVATARS[task.assignedTo] ? (
@@ -102,7 +108,7 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBloc
                 <span 
                   className={`${ASSIGNEE_AVATARS[task.assignedTo] ? 'hidden' : 'flex'} items-center justify-center w-full h-full`}
                 >
-                  {ASSIGNEE_INITIALS[task.assignedTo]}
+                  {ASSIGNEE_INITIALS[task.assignedTo] || task.assignedTo?.charAt(0).toUpperCase()}
                 </span>
               </div>
             )}
