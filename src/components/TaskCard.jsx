@@ -44,11 +44,11 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-dark-hover border border-dark-border rounded-lg p-4 cursor-grab active:cursor-grabbing hover:border-gray-600 transition-all group"
+      className="bg-dark-hover/80 backdrop-blur-sm border border-dark-border/40 rounded-xl p-5 cursor-grab active:cursor-grabbing hover:border-gray-500/50 transition-all duration-200 group shadow-xl hover:shadow-2xl hover:shadow-black/50 shadow-black/40 hover:-translate-y-0.5"
     >
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-medium text-white flex-1">{task.title}</h3>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+      <div className="flex items-start justify-between mb-3">
+        <h3 className="font-semibold text-white flex-1 leading-snug">{task.title}</h3>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ml-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -80,21 +80,21 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging }) => {
       </div>
       
       {task.description && (
-        <p className="text-sm text-gray-400 mb-3 line-clamp-2">{task.description}</p>
+        <p className="text-sm text-gray-400 mb-3 line-clamp-2 leading-relaxed">{task.description}</p>
       )}
       
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-4 pt-3 border-t border-dark-border/30">
         <div className="flex gap-2 flex-wrap">
           {task.tags?.map((tag, index) => (
             <span
               key={index}
-              className={`text-xs px-2 py-1 rounded border ${TAG_COLORS[tag] || TAG_COLORS.feature}`}
+              className={`text-xs px-2.5 py-1 rounded-md border ${TAG_COLORS[tag] || TAG_COLORS.feature} font-medium shadow-sm`}
             >
               {tag}
             </span>
           ))}
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-500 font-medium">
           {formatDate(task.updatedAt || task.createdAt)}
         </span>
       </div>
