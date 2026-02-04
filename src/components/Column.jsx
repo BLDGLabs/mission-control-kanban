@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TaskCard from './TaskCard';
 
-const Column = ({ id, title, tasks, onEditTask, onDeleteTask, onCompleteTask, epics, allTasks, isTaskBlocked, getBlockingTasks }) => {
+const Column = ({ id, title, tasks, onEditTask, onDeleteTask, onCompleteTask, onQuickViewTask, epics, allTasks, isTaskBlocked, getBlockingTasks }) => {
   const { setNodeRef } = useDroppable({ id });
 
   return (
@@ -26,6 +26,7 @@ const Column = ({ id, title, tasks, onEditTask, onDeleteTask, onCompleteTask, ep
                 onEdit={onEditTask}
                 onDelete={onDeleteTask}
                 onComplete={onCompleteTask}
+                onQuickView={onQuickViewTask}
                 epic={epics?.find(e => e.id === task.epicId)}
                 isBlocked={isTaskBlocked?.(task)}
                 blockingTasks={getBlockingTasks?.(task)}

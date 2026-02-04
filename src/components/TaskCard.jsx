@@ -32,7 +32,7 @@ const ASSIGNEE_INITIALS = {
   'jason': 'J',
 };
 
-const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBlocked, blockingTasks }) => {
+const TaskCard = ({ task, onEdit, onDelete, onComplete, onQuickView, isDragging, epic, isBlocked, blockingTasks }) => {
   const {
     attributes,
     listeners,
@@ -45,6 +45,16 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBloc
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  // Handle click to open quick view (only if not dragging)
+  const handleCardClick = (e) => {
+    // Don't open quick view if clicking on action buttons
+    if (e.target.closest('button')) return;
+    // Open quick view
+    if (onQuickView) {
+      onQuickView(task);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -66,6 +76,7 @@ const TaskCard = ({ task, onEdit, onDelete, onComplete, isDragging, epic, isBloc
       style={style}
       {...attributes}
       {...listeners}
+      onClick={handleCardClick}
       className={`bg-dark-hover/80 backdrop-blur-sm border rounded-xl p-5 cursor-grab active:cursor-grabbing hover:border-gray-500/50 transition-all duration-200 group shadow-xl hover:shadow-2xl hover:shadow-black/50 shadow-black/40 hover:-translate-y-0.5 ${
         isBlocked 
           ? 'border-orange-500/40 bg-dark-hover/60' 

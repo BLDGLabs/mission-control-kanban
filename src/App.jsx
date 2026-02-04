@@ -6,6 +6,7 @@ import Column from './components/Column';
 import TaskCard from './components/TaskCard';
 import ActivityFeed from './components/ActivityFeed';
 import TaskModal from './components/TaskModal';
+import TaskQuickView from './components/TaskQuickView';
 import EpicSidebar from './components/EpicSidebar';
 import EpicModal from './components/EpicModal';
 import MitiStatusWidget from './components/MitiStatusWidget';
@@ -136,6 +137,7 @@ function App() {
   const [selectedAssignee, setSelectedAssignee] = useState(null);
   const [isEpicModalOpen, setIsEpicModalOpen] = useState(false);
   const [editingEpic, setEditingEpic] = useState(null);
+  const [quickViewTask, setQuickViewTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mobileColumnIndex, setMobileColumnIndex] = useState(1); // Start on Backlog
@@ -336,8 +338,21 @@ function App() {
   };
 
   const handleEditTask = (task) => {
+    setQuickViewTask(null); // Close quick view if open
     setEditingTask(task);
     setIsModalOpen(true);
+  };
+
+  const handleQuickViewTask = (task) => {
+    setQuickViewTask(task);
+  };
+
+  const handleQuickViewEdit = () => {
+    if (quickViewTask) {
+      setEditingTask(quickViewTask);
+      setQuickViewTask(null);
+      setIsModalOpen(true);
+    }
   };
 
   const handleDeleteTask = async (taskId) => {
@@ -663,6 +678,7 @@ function App() {
                       onEditTask={handleEditTask}
                       onDeleteTask={handleDeleteTask}
                       onCompleteTask={handleCompleteTask}
+                      onQuickViewTask={handleQuickViewTask}
                       epics={epics}
                       allTasks={tasks}
                       isTaskBlocked={isTaskBlocked}
@@ -681,6 +697,7 @@ function App() {
                     onEditTask={handleEditTask}
                     onDeleteTask={handleDeleteTask}
                     onCompleteTask={handleCompleteTask}
+                    onQuickViewTask={handleQuickViewTask}
                     epics={epics}
                     allTasks={tasks}
                     isTaskBlocked={isTaskBlocked}
@@ -767,6 +784,17 @@ function App() {
             setIsEpicModalOpen(false);
             setEditingEpic(null);
           }}
+        />
+      )}
+
+      {/* Task Quick View */}
+      {quickViewTask && (
+        <TaskQuickView
+          task={quickViewTask}
+          epic={epics.find(e => e.id === quickViewTask.epicId)}
+          allTasks={tasks}
+          onClose={() => setQuickViewTask(null)}
+          onEdit={handleQuickViewEdit}
         />
       )}
     </div>
