@@ -37,6 +37,15 @@ const config = isBrowser ? {
   },
 };
 
+// Debug logging (remove after fixing)
+console.log('DynamoDB Config:', {
+  isBrowser,
+  region: config.region,
+  hasAccessKey: !!config.credentials?.accessKeyId,
+  hasSecretKey: !!config.credentials?.secretAccessKey,
+  accessKeyPreview: config.credentials?.accessKeyId?.substring(0, 8) + '...',
+});
+
 const client = new DynamoDBClient(config);
 const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = isBrowser ? import.meta.env.VITE_DYNAMODB_TABLE_NAME : process.env.DYNAMODB_TABLE_NAME;
